@@ -9,6 +9,7 @@ const Weather = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Use effect to get the user's location when the component mounts
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -30,18 +31,21 @@ const Weather = () => {
     }
   }, []);
 
+  // Use effect to fetch the city name based on the location
   useEffect(() => {
     if (location.lat && location.lon) {
       fetchCityName(location.lat, location.lon);
     }
   }, [location]);
 
+  // Use effect to fetch the weather data based on the city name
   useEffect(() => {
     if (city) {
       fetchWeather(city);
     }
   }, [city]);
 
+  // Function to fetch the city name using reverse geocoding
   const fetchCityName = async (lat, lon) => {
     const apiKey = 'a4ecdcbafa7a1d84e5c50a975a993646';
     const url = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
@@ -59,6 +63,7 @@ const Weather = () => {
     }
   };
 
+   // Function to fetch the weather data based on the city name
   const fetchWeather = async (cityName) => {
     const apiKey = 'a4ecdcbafa7a1d84e5c50a975a993646';
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${apiKey}`;
@@ -74,6 +79,7 @@ const Weather = () => {
     }
   };
 
+   // Loading state while fetching data
   if (loading) {
     return (
       <Container className="my-4 text-center">
@@ -83,6 +89,7 @@ const Weather = () => {
     );
   }
 
+  // Error state if there was an error fetching data
   if (error) {
     return (
       <Container className="my-4">

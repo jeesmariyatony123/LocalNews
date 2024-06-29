@@ -11,13 +11,13 @@ import Weather from './Weather';
 
 const NewsBoard = ({ category }) => {
 
+    // State variables to manage query, language, sort option, and articles
     const [query, setQuery] = useState('');
     const [language, setLanguage] = useState('en');
     const [sortBy, setSortBy] = useState('publishedAt')
     const [articles, setArticles] = useState([]);
 
-
-
+    // Function to fetch news articles based on query, language, and sort option
     const searchNews = async () => {
         const apiKey = '62e68607b8744703b1014df2e828e22f';
         const url = 'https://newsapi.org/v2/everything';
@@ -70,7 +70,6 @@ const NewsBoard = ({ category }) => {
                                     <option value="it">Italian</option>
                                     <option value="ru">Russian</option>
                                     <option value="zh">Chinese</option>
-                                    {/* Add more languages as needed */}
                                 </Form.Control>
                             </Form.Group>
                             <Form.Group controlId="sortSelect" className="px-2" >

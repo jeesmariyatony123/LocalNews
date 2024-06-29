@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import images from '../assets/images/news.jpg';
 
+// The NewsItem component takes in props for title, description, image source, and URL
 const NewsItem = ({ title, description, src, url }) => {
   return (
     <Card className='mb-3 d-inline-block my-3 mx-3 px-2 py-2' style={{ maxWidth: '345px' }}>
