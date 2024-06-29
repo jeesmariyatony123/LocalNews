@@ -1,60 +1,126 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 
 const Weather = () => {
+  const [location, setLocation] = useState({ lat: null, lon: null });
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid={YOUR_API_KEY}`
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (err) => {
+          console.error('Error getting geolocation', err);
+          setError('Geolocation permission denied. Please reset your permissions.');
+          setLoading(false);
+        }
       );
-      setWeatherData(response.data);
-      console.log(response.data); //You can see all the weather data in console log
+    } else {
+      setError('Geolocation is not supported by this browser.');
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (location.lat && location.lon) {
+      fetchCityName(location.lat, location.lon);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if (city) {
+      fetchWeather(city);
+    }
+  }, [city]);
+
+  const fetchCityName = async (lat, lon) => {
+    const apiKey = 'a4ecdcbafa7a1d84e5c50a975a993646';
+    const url = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
+
+    try {
+      const response = await axios.get(url);
+      if (response.data && response.data.length > 0) {
+        setCity(response.data[0].name);
+      } else {
+        setError('Unable to fetch city name');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching the city name', error);
+      setError('Error fetching the city name');
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fetchWeather = async (cityName) => {
+    const apiKey = 'a4ecdcbafa7a1d84e5c50a975a993646';
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${apiKey}`;
 
-  const handleInputChange = (e) => {
-    setCity(e.target.value);
+    try {
+      const response = await axios.get(url);
+      setWeather(response.data);
+    } catch (error) {
+      console.error('Error fetching the weather data', error);
+      setError('Error fetching the weather data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetchData();
-  };
+  if (loading) {
+    return (
+      <Container className="my-4 text-center">
+        <Spinner animation="border" />
+        <p>Loading weather data...</p>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container className="my-4">
+        <Alert variant="danger">
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Enter city name"
-          value={city}
-          onChange={handleInputChange}
-        />
-        <button type="submit">Get Weather</button>
-      </form>
-      {weatherData ? (
-        <>
-          <h2>{weatherData.name}</h2>
-          <p>Temperature: {weatherData.main.temp}°C</p>
-          <p>Description: {weatherData.weather[0].description}</p>
-          <p>Feels like : {weatherData.main.feels_like}°C</p>
-          <p>Humidity : {weatherData.main.humidity}%</p>
-          <p>Pressure : {weatherData.main.pressure}</p>
-          <p>Wind Speed : {weatherData.wind.speed}m/s</p>
-        </>
+    <Container className="my-4">
+      {weather ? (
+        <Row className="justify-content-center">
+          <Col md={6} lg={4}>
+            <Card className='weatherimage'>
+              <Card.Body className='text-white'>
+                <Card.Title>{weather.name}</Card.Title>
+                <Card.Text>
+                  <strong>Temperature:</strong> {weather.main.temp}°C
+                </Card.Text>
+                <Card.Text>
+                  <strong>Weather:</strong> {weather.weather[0].description}
+                </Card.Text>
+                <Card.Text>
+                  <strong>Humidity:</strong> {weather.main.humidity}%
+                </Card.Text>
+                <Card.Text>
+                  <strong>Wind Speed:</strong> {weather.wind.speed} m/s
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       ) : (
-        <p>Loading weather data...</p>
+        <p>Unable to fetch weather data</p>
       )}
-    </div>
+    </Container>
   );
 };
 

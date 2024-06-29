@@ -8,8 +8,10 @@ function App() {
 
   return (
     <>
-      <Navibar setCategory={setCategory}/>
-      <NewsBoard category={category}/>
+      <Navibar setCategory={setCategory} />
+      <div className='background'>
+        <NewsBoard category={category} />
+      </div>
     </>
   )
 }
